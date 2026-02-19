@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.554">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Kara C. Hoover">
+<meta name="dcterms.date" content="2021-06-05">
+
+<title>Fitness Tracking: Performance versus Regularity</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="fitnessTracking-MLProject_files/libs/clipboard/clipboard.min.js"></script>
+<script src="fitnessTracking-MLProject_files/libs/quarto-html/quarto.js"></script>
+<script src="fitnessTracking-MLProject_files/libs/quarto-html/popper.min.js"></script>
+<script src="fitnessTracking-MLProject_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="fitnessTracking-MLProject_files/libs/quarto-html/anchor.min.js"></script>
+<link href="fitnessTracking-MLProject_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="fitnessTracking-MLProject_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="fitnessTracking-MLProject_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="fitnessTracking-MLProject_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="fitnessTracking-MLProject_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#key-findings" id="toc-key-findings" class="nav-link" data-scroll-target="#key-findings">Key Findings</a></li>
+  <li><a href="#data-processing" id="toc-data-processing" class="nav-link" data-scroll-target="#data-processing">Data Processing</a></li>
+  <li><a href="#machine-learning-best-model-random-forest-model" id="toc-machine-learning-best-model-random-forest-model" class="nav-link" data-scroll-target="#machine-learning-best-model-random-forest-model">Machine Learning Best Model: Random Forest Model</a></li>
+  <li><a href="#machine-learning-other-models" id="toc-machine-learning-other-models" class="nav-link" data-scroll-target="#machine-learning-other-models">Machine Learning: Other Models</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Fitness Tracking: Performance versus Regularity</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">ML | random forest |gradient boosting | decision tree | machine learning</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Kara C. Hoover </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 5, 2021</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>Fitness tracking typically focuses on the regularity of exercise rather than how well it is performed. The goal of this project was to predict the manner in which subjects performed barbell lifts using accelerometer data collected from belt, forearm, arm, and dumbbell sensors. Performance was categorized into five methods stored in the classe variable, representing one correct and four incorrect techniques. Data were trained using four algorithms in the caret package with cross-validation via trainControl: a decision tree (rpart), a resampled decision tree (bagging), a random forest, and a resampled random forest (gradient boosting). Variables unrelated to exercise and those with high proportions of missing values were removed, leaving 52 predictors. Data were partitioned 60/40 into training and test sets.</p>
+</section>
+<section id="key-findings" class="level2">
+<h2 class="anchored" data-anchor-id="key-findings">Key Findings</h2>
+<p>The decision tree model performed no better than chance (accuracy: 0.497) and failed to predict Class D entirely, making it unsuitable for this classification task. Resampling substantially improved performance — the bagged tree reached 0.958 accuracy and the gradient boosted forest reached 0.963. The random forest model achieved the highest accuracy (0.994) with an out-of-sample error of just 0.006. However, given that accuracy peaks at 27 of 52 predictors and potential collinearity among variables, the model may be over-fitted. Domain expertise in exercise physiology would be valuable in identifying the most meaningful predictors and addressing collinearity.</p>
+</section>
+<section id="data-processing" class="level2">
+<h2 class="anchored" data-anchor-id="data-processing">Data Processing</h2>
+<p><strong>Get train and test data.</strong> The data are found <a href="http://groupware.les.inf.puc-rio.br/har">here</a>. More information on the data is found in the section on the Weight Lifting Exercise Dataset. <a href="http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har">here</a>.</p>
+<p>To replicate, find the train and test datasets here:</p>
+<ul>
+<li><a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv">trainUrl</a></li>
+<li><a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv">testUrl</a></li>
+</ul>
+<p><strong>Clean Data.</strong> Variables were removed from the both training and test sets if they were not related to the exercises defined above. Variables containing mostly NA values were also removed.</p>
+<p><strong>Partition data.</strong> The partition between training and test was 60/40.</p>
+</section>
+<section id="machine-learning-best-model-random-forest-model" class="level2">
+<h2 class="anchored" data-anchor-id="machine-learning-best-model-random-forest-model">Machine Learning Best Model: Random Forest Model</h2>
+<p>The random forest model had marginally better accuracy than the resampled tree and resampled forest models. Random forest models tend to be highly accurate even if prone to overfitting and harder to understand than decision trees. The accuracy of the random forest model was high (0.994, 95% CI: 0.992–0.995, Kappa: 0.992).</p>
+<p><strong>Table 1: Confusion Matrix-Random Forest Model</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>A</strong></td>
+<td>2228</td>
+<td>3</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><strong>B</strong></td>
+<td>13</td>
+<td>1503</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><strong>C</strong></td>
+<td>0</td>
+<td>4</td>
+<td>1357</td>
+<td>7</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><strong>D</strong></td>
+<td>0</td>
+<td>1</td>
+<td>9</td>
+<td>1276</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><strong>E</strong></td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>7</td>
+<td>1432</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Table 2. Performance Statistics by Class — Random Forest Model</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Statistic</th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sensitivity</td>
+<td>0.994</td>
+<td>0.995</td>
+<td>0.989</td>
+<td>0.989</td>
+<td>1.000</td>
+</tr>
+<tr class="even">
+<td>Specificity</td>
+<td>0.999</td>
+<td>0.998</td>
+<td>0.998</td>
+<td>0.998</td>
+<td>0.998</td>
+</tr>
+<tr class="odd">
+<td>Pos Pred Value</td>
+<td>0.998</td>
+<td>0.990</td>
+<td>0.992</td>
+<td>0.992</td>
+<td>0.993</td>
+</tr>
+<tr class="even">
+<td>Neg Pred Value</td>
+<td>0.998</td>
+<td>0.999</td>
+<td>0.998</td>
+<td>0.998</td>
+<td>1.000</td>
+</tr>
+<tr class="odd">
+<td>Prevalence</td>
+<td>0.286</td>
+<td>0.193</td>
+<td>0.175</td>
+<td>0.164</td>
+<td>0.183</td>
+</tr>
+<tr class="even">
+<td>Detection Rate</td>
+<td>0.284</td>
+<td>0.192</td>
+<td>0.173</td>
+<td>0.163</td>
+<td>0.183</td>
+</tr>
+<tr class="odd">
+<td>Detection Prevalence</td>
+<td>0.284</td>
+<td>0.193</td>
+<td>0.174</td>
+<td>0.164</td>
+<td>0.184</td>
+</tr>
+<tr class="even">
+<td>Balanced Accuracy</td>
+<td>0.997</td>
+<td>0.996</td>
+<td>0.994</td>
+<td>0.994</td>
+<td>0.999</td>
+</tr>
+</tbody>
+</table>
+<p>There are 52 predictors in the model but accuracy peaks at ~27. Some domain expertise would be useful in determining which predictors are most valuable; an analysis of collinearity would also be worthwhile — when predictors are collinear they can contribute to model overfitting and falsely inflated accuracy. Collinear variables can be weighted to reduce their impact.</p>
+<p>Accuracy was stable across 2 and 27 randomly selected predictors (0.989) before declining at the full set of 52 (0.982), suggesting the model does not benefit from using all available predictors.</p>
+<p><img src="rf-errorVtrees.png" class="img-fluid" alt="Figure1"> <strong>Figure 1: Random Forest Model Error ~ Trees: Model error declines rapidly through the first 100 trees and stabilizes around 200, indicating model convergence. Each line represents one of the five classes (A–E).</strong></p>
+<p><img src="rf-varImportance.png" class="img-fluid" alt="Figure2"> <strong>Figure 2: Variable Importance for Random Forest</strong></p>
+</section>
+<section id="machine-learning-other-models" class="level2">
+<h2 class="anchored" data-anchor-id="machine-learning-other-models">Machine Learning: Other Models</h2>
+<p><strong>Decision Tree Using <em>rpart</em>.</strong> The first model built used the decision tree method because it is particularly useful for categorical variables, such as classe. Trees are also very easy to understand. Accuracy (0.497, 95% CI: 0.486–0.509, Kappa: 0.343) is no better than chance sorting. Notably, the model failed to predict class D entirely (Sensitivity: NA, Prevalence: 0.000), and performance was weakest for classes B and C. The decision tree method using rpart is not useful for predicting <em>classe</em>.</p>
+<p><strong>Table 3: Confusion Matrix — Decision Tree (<em>rpart</em>)</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>A</strong></td>
+<td>2032</td>
+<td>41</td>
+<td>154</td>
+<td>0</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td><strong>B</strong></td>
+<td>624</td>
+<td>525</td>
+<td>369</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><strong>C</strong></td>
+<td>646</td>
+<td>33</td>
+<td>689</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><strong>D</strong></td>
+<td>577</td>
+<td>244</td>
+<td>465</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><strong>E</strong></td>
+<td>211</td>
+<td>191</td>
+<td>383</td>
+<td>0</td>
+<td>657</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Table 4: Performance Statistics by Class — Decision Tree (<em>rpart</em>)</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Statistic</th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sensitivity</td>
+<td>0.497</td>
+<td>0.508</td>
+<td>0.335</td>
+<td>NA</td>
+<td>0.992</td>
+</tr>
+<tr class="even">
+<td>Specificity</td>
+<td>0.947</td>
+<td>0.854</td>
+<td>0.883</td>
+<td>0.836</td>
+<td>0.891</td>
+</tr>
+<tr class="odd">
+<td>Pos Pred Value</td>
+<td>0.910</td>
+<td>0.346</td>
+<td>0.504</td>
+<td>NA</td>
+<td>0.456</td>
+</tr>
+<tr class="even">
+<td>Neg Pred Value</td>
+<td>0.633</td>
+<td>0.920</td>
+<td>0.788</td>
+<td>NA</td>
+<td>0.999</td>
+</tr>
+<tr class="odd">
+<td>Prevalence</td>
+<td>0.521</td>
+<td>0.132</td>
+<td>0.263</td>
+<td>0.000</td>
+<td>0.084</td>
+</tr>
+<tr class="even">
+<td>Detection Rate</td>
+<td>0.259</td>
+<td>0.067</td>
+<td>0.088</td>
+<td>0.000</td>
+<td>0.084</td>
+</tr>
+<tr class="odd">
+<td>Detection Prevalence</td>
+<td>0.284</td>
+<td>0.194</td>
+<td>0.174</td>
+<td>0.164</td>
+<td>0.184</td>
+</tr>
+<tr class="even">
+<td>Balanced Accuracy</td>
+<td>0.722</td>
+<td>0.681</td>
+<td>0.609</td>
+<td>NA</td>
+<td>0.942</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decision Tree Using <em>bag</em>.</strong> The bag method for trees balances bias against variance and averages multiple models produced by resampling. The accuracy of the bagged tree was substantially improved over the rpart decision tree (0.958, 95% CI: 0.954–0.963, Kappa: 0.947), demonstrating the power of resampling to reduce variance. Unlike the rpart model, all five classes were predicted successfully with sensitivity ranging from 0.934 (Class C) to 0.982 (Class E).</p>
+<p><strong>Table 5: Confusion Matrix — Decision Tree (<em>bag</em>)</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>A</strong></td>
+<td>2180</td>
+<td>28</td>
+<td>10</td>
+<td>9</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td><strong>B</strong></td>
+<td>33</td>
+<td>1429</td>
+<td>36</td>
+<td>11</td>
+<td>9</td>
+</tr>
+<tr class="odd">
+<td><strong>C</strong></td>
+<td>2</td>
+<td>47</td>
+<td>1294</td>
+<td>24</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><strong>D</strong></td>
+<td>6</td>
+<td>5</td>
+<td>33</td>
+<td>1231</td>
+<td>11</td>
+</tr>
+<tr class="odd">
+<td><strong>E</strong></td>
+<td>5</td>
+<td>18</td>
+<td>13</td>
+<td>22</td>
+<td>1384</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Table 6: Performance Statistics by Class — Decision Tree (<em>bag</em>)</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Statistic</th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sensitivity</td>
+<td>0.979</td>
+<td>0.936</td>
+<td>0.934</td>
+<td>0.949</td>
+<td>0.982</td>
+</tr>
+<tr class="even">
+<td>Specificity</td>
+<td>0.991</td>
+<td>0.986</td>
+<td>0.989</td>
+<td>0.992</td>
+<td>0.991</td>
+</tr>
+<tr class="odd">
+<td>Pos Pred Value</td>
+<td>0.977</td>
+<td>0.941</td>
+<td>0.946</td>
+<td>0.957</td>
+<td>0.960</td>
+</tr>
+<tr class="even">
+<td>Neg Pred Value</td>
+<td>0.992</td>
+<td>0.985</td>
+<td>0.986</td>
+<td>0.990</td>
+<td>0.996</td>
+</tr>
+<tr class="odd">
+<td>Prevalence</td>
+<td>0.284</td>
+<td>0.195</td>
+<td>0.177</td>
+<td>0.165</td>
+<td>0.180</td>
+</tr>
+<tr class="even">
+<td>Detection Rate</td>
+<td>0.278</td>
+<td>0.182</td>
+<td>0.165</td>
+<td>0.157</td>
+<td>0.176</td>
+</tr>
+<tr class="odd">
+<td>Detection Prevalence</td>
+<td>0.284</td>
+<td>0.193</td>
+<td>0.174</td>
+<td>0.164</td>
+<td>0.184</td>
+</tr>
+<tr class="even">
+<td>Balanced Accuracy</td>
+<td>0.985</td>
+<td>0.961</td>
+<td>0.961</td>
+<td>0.970</td>
+<td>0.986</td>
+</tr>
+</tbody>
+</table>
+<p><img src="bag-varImportance.png" class="img-fluid" alt="Fig3"> <strong>Figure 3: Variable Importance for Decision Tree Using <em>Bag</em></strong></p>
+<p><strong>Random Forest Using <em>gbm</em>.</strong> This is a resampled random forest model that averages multiple models and weights weak predictors to provide more balance. The accuracy of the boosted random forest was high (0.963, 95% CI: 0.959–0.967, Kappa: 0.953), comparable to the bagged tree (0.958) and slightly below the random forest (0.994). Sensitivity was strong across all classes, ranging from 0.934 (Class B) to 0.993 (Class E).</p>
+<p><strong>Table 7: Confusion Matrix — Random Forest Using Gradient Boosting</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>A</strong></td>
+<td>2187</td>
+<td>34</td>
+<td>6</td>
+<td>5</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><strong>B</strong></td>
+<td>49</td>
+<td>1435</td>
+<td>28</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td><strong>C</strong></td>
+<td>0</td>
+<td>44</td>
+<td>1299</td>
+<td>22</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td><strong>D</strong></td>
+<td>0</td>
+<td>10</td>
+<td>28</td>
+<td>1245</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td><strong>E</strong></td>
+<td>2</td>
+<td>14</td>
+<td>15</td>
+<td>20</td>
+<td>1391</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Table 8: Performance Statistics by Class — Random Forest Using Gradient Boosting</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Statistic</th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sensitivity</td>
+<td>0.977</td>
+<td>0.934</td>
+<td>0.944</td>
+<td>0.962</td>
+<td>0.993</td>
+</tr>
+<tr class="even">
+<td>Specificity</td>
+<td>0.992</td>
+<td>0.987</td>
+<td>0.989</td>
+<td>0.994</td>
+<td>0.992</td>
+</tr>
+<tr class="odd">
+<td>Pos Pred Value</td>
+<td>0.980</td>
+<td>0.945</td>
+<td>0.950</td>
+<td>0.968</td>
+<td>0.965</td>
+</tr>
+<tr class="even">
+<td>Neg Pred Value</td>
+<td>0.991</td>
+<td>0.984</td>
+<td>0.988</td>
+<td>0.993</td>
+<td>0.998</td>
+</tr>
+<tr class="odd">
+<td>Prevalence</td>
+<td>0.285</td>
+<td>0.196</td>
+<td>0.175</td>
+<td>0.165</td>
+<td>0.179</td>
+</tr>
+<tr class="even">
+<td>Detection Rate</td>
+<td>0.279</td>
+<td>0.183</td>
+<td>0.166</td>
+<td>0.159</td>
+<td>0.177</td>
+</tr>
+<tr class="odd">
+<td>Detection Prevalence</td>
+<td>0.284</td>
+<td>0.193</td>
+<td>0.174</td>
+<td>0.164</td>
+<td>0.184</td>
+</tr>
+<tr class="even">
+<td>Balanced Accuracy</td>
+<td>0.985</td>
+<td>0.960</td>
+<td>0.967</td>
+<td>0.978</td>
+<td>0.992</td>
+</tr>
+</tbody>
+</table>
+<p><img src="gbm-varImportance.png" class="img-fluid" alt="Fig4"> <strong>Figure 4: Variable Importance for Random Forest Using <em>gbm</em></strong></p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
