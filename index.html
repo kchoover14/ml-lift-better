@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Kara C. Hoover">
 
 <title>How You Lift Matters: Wearable Sensors Can Detect Exercise Form Errors with 99% Accuracy</title>
 <style>
@@ -37,7 +38,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="ml-lift-better_files/libs/quarto-html/quarto-syntax-highlighting-076ecbd647e1f0418c5051713cd9b730.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="ml-lift-better_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="ml-lift-better_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="ml-lift-better_files/libs/bootstrap/bootstrap-fdc35ccebf6ef883c9ad23e25989f106.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="ml-lift-better_files/libs/bootstrap/bootstrap-2ff945e08977e8cdd59abf7ee4492cef.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -55,9 +56,10 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#research-answers" id="toc-research-answers" class="nav-link" data-scroll-target="#research-answers">Research Answers</a>
   <ul class="collapse">
   <li><a href="#decision-tree-chance-level-performance" id="toc-decision-tree-chance-level-performance" class="nav-link" data-scroll-target="#decision-tree-chance-level-performance">Decision Tree: Chance-Level Performance</a></li>
-  <li><a href="#resampling-recovers-performance" id="toc-resampling-recovers-performance" class="nav-link" data-scroll-target="#resampling-recovers-performance">Resampling Recovers Performance</a></li>
+  <li><a href="#resampling-recovers-performance-bagged-tree" id="toc-resampling-recovers-performance-bagged-tree" class="nav-link" data-scroll-target="#resampling-recovers-performance-bagged-tree">Resampling Recovers Performance: Bagged Tree</a></li>
   <li><a href="#gradient-boosting-comparable-to-bagging" id="toc-gradient-boosting-comparable-to-bagging" class="nav-link" data-scroll-target="#gradient-boosting-comparable-to-bagging">Gradient Boosting: Comparable to Bagging</a></li>
   <li><a href="#random-forest-best-model" id="toc-random-forest-best-model" class="nav-link" data-scroll-target="#random-forest-best-model">Random Forest: Best Model</a></li>
+  <li><a href="#model-comparison" id="toc-model-comparison" class="nav-link" data-scroll-target="#model-comparison">Model Comparison</a></li>
   </ul></li>
   <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next Steps</a></li>
   <li><a href="#study-design" id="toc-study-design" class="nav-link" data-scroll-target="#study-design">Study Design</a></li>
@@ -86,6 +88,12 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Kara C. Hoover </p>
+          </div>
+  </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
@@ -131,27 +139,29 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
+<hr>
 </section>
 <section id="research-question" class="level2">
 <h2 class="anchored" data-anchor-id="research-question">Research Question</h2>
 <p>Can wearable accelerometer sensors reliably distinguish between correct exercise form and specific, defined technique errors during bicep curls – and if so, which sensor locations and model types provide the most accurate classification?</p>
+<hr>
 </section>
 <section id="research-answers" class="level2">
 <h2 class="anchored" data-anchor-id="research-answers">Research Answers</h2>
-<p>The core question was whether machine learning models could differentiate not just whether someone exercised, but how well they moved. The answer depends entirely on the model chosen: a single decision tree cannot solve this problem, but ensemble methods can.</p>
+<p>The core question was whether machine learning models could differentiate not just whether someone exercised, but how well they moved. The answer depends entirely on the model chosen: a single decision tree cannot solve this problem, but ensemble methods can. Results across all four models are summarized in <strong>Table 9</strong> at the end of this section.</p>
 <section id="decision-tree-chance-level-performance" class="level3">
 <h3 class="anchored" data-anchor-id="decision-tree-chance-level-performance">Decision Tree: Chance-Level Performance</h3>
-<p>The rpart decision tree achieved 49.7% accuracy – statistically indistinguishable from random guessing. Its most critical failure was a complete inability to predict Class D (half-range lifting), where sensitivity was undefined (NA) and prevalence was recorded as zero. Classes B and C also showed weak performance. This model is not fit for purpose.</p>
+<p>The rpart decision tree achieved 49.7% accuracy (95% CI: 48.6–50.9%, Kappa: 0.343) – statistically indistinguishable from random guessing. Its most critical failure, visible in <strong>Table 1</strong>, was a complete inability to predict Class D (half-range lifting): every one of the 1,286 Class D observations was misclassified, with 577 assigned to A, 244 to B, and 465 to C. <strong>Table 2</strong> confirms the consequence – sensitivity for Class D is undefined (NA) and prevalence records as zero, meaning the model never once predicted this class. Classes B and C also showed weak sensitivity (0.508 and 0.334 respectively). Class E was the only class the model handled reliably (sensitivity: 0.992), likely because its distinctive hip-forward movement pattern produces sensor readings sufficiently different from the others. The model lacks the variance-reduction mechanisms needed to separate visually similar movement patterns.</p>
 <p><strong>Table 1. Confusion Matrix – Decision Tree (rpart)</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
+<th><strong>A</strong></th>
+<th><strong>B</strong></th>
+<th><strong>C</strong></th>
+<th><strong>D</strong></th>
+<th><strong>E</strong></th>
 </tr>
 </thead>
 <tbody>
@@ -214,7 +224,7 @@ ul.task-list li input[type="checkbox"] {
 <td>Sensitivity</td>
 <td>0.497</td>
 <td>0.508</td>
-<td>0.335</td>
+<td>0.334</td>
 <td>NA</td>
 <td>0.992</td>
 </tr>
@@ -261,7 +271,7 @@ ul.task-list li input[type="checkbox"] {
 <tr class="odd">
 <td>Detection Prevalence</td>
 <td>0.284</td>
-<td>0.194</td>
+<td>0.193</td>
 <td>0.174</td>
 <td>0.164</td>
 <td>0.184</td>
@@ -276,21 +286,25 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 </tbody>
 </table>
-<p><strong>Interpretation:</strong> The decision tree’s failure to detect Class D at all reflects a fundamental limitation of single-tree classifiers on high-dimensional, correlated sensor data. The model lacks the variance-reduction mechanisms needed to separate visually similar movement patterns.</p>
+<hr>
 </section>
-<section id="resampling-recovers-performance" class="level3">
-<h3 class="anchored" data-anchor-id="resampling-recovers-performance">Resampling Recovers Performance</h3>
-<p>Resampling methods substantially recovered classification performance. The bagged tree – which averages multiple models produced by resampling – reached 95.8% accuracy (95% CI: 95.4–96.3%, Kappa: 0.947) and successfully predicted all five classes, with sensitivity ranging from 0.934 (Class C) to 0.982 (Class E).</p>
-<p><strong>Table 3. Confusion Matrix – Decision Tree (bag)</strong></p>
+<section id="resampling-recovers-performance-bagged-tree" class="level3">
+<h3 class="anchored" data-anchor-id="resampling-recovers-performance-bagged-tree">Resampling Recovers Performance: Bagged Tree</h3>
+<p>The bagged tree – which averages multiple models produced by resampling – reached 95.8% accuracy (95% CI: 95.4–96.3%, Kappa: 0.947) and successfully predicted all five classes, including Class D which the decision tree missed entirely. Variable importance for the bagged tree is computed per class, reflecting which predictors most strongly distinguish each form category from the others. <strong>Figure 1</strong> shows that belt and forearm sensor readings dominate across all five classes, with pitch and roll measurements consistently appearing among the top predictors. The per-class structure reveals meaningful differences – Class D (half-range) and Class E (hip-forward) show distinct importance profiles compared to Classes A, B, and C, consistent with their biomechanical differences.</p>
+<p><strong>Figure 1. Variable Importance by Class – Bagged Tree</strong></p>
+<p><img src="outputs/bag-varImportance.png" class="img-fluid"></p>
+<p><strong>Interpretation:</strong> Belt and forearm sensors carry the most discriminating information across all five form classes. The class-by-class variation in importance profiles suggests that different movement errors activate different sensor signals – supporting the case for targeted sensor placement in any deployment scenario.</p>
+<p>As shown in <strong>Table 3</strong>, misclassifications are now spread across the diagonal rather than collapsing into a few dominant classes – a dramatic improvement over rpart. <strong>Table 4</strong> shows sensitivity ranging from 0.934 (Class C) to 0.982 (Class E), with specificity above 0.986 for all classes, indicating very few false positives in any category.</p>
+<p><strong>Table 3. Confusion Matrix – Bagged Tree</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
+<th><strong>A</strong></th>
+<th><strong>B</strong></th>
+<th><strong>C</strong></th>
+<th><strong>D</strong></th>
+<th><strong>E</strong></th>
 </tr>
 </thead>
 <tbody>
@@ -306,14 +320,14 @@ ul.task-list li input[type="checkbox"] {
 <td><strong>B</strong></td>
 <td>33</td>
 <td>1429</td>
-<td>36</td>
+<td>47</td>
 <td>11</td>
-<td>9</td>
+<td>18</td>
 </tr>
 <tr class="odd">
 <td><strong>C</strong></td>
 <td>2</td>
-<td>47</td>
+<td>36</td>
 <td>1294</td>
 <td>24</td>
 <td>1</td>
@@ -329,14 +343,14 @@ ul.task-list li input[type="checkbox"] {
 <tr class="odd">
 <td><strong>E</strong></td>
 <td>5</td>
-<td>18</td>
+<td>9</td>
 <td>13</td>
 <td>22</td>
 <td>1384</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Table 4. Performance Statistics by Class – Decision Tree (bag)</strong></p>
+<p><strong>Table 4. Performance Statistics by Class – Bagged Tree</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -415,69 +429,71 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 </tbody>
 </table>
-<p><strong>Figure 3. Variable Importance – Decision Tree (bag)</strong></p>
-<p><img src="bag-varImportance.png" class="img-fluid"></p>
-<p><strong>Interpretation:</strong> The jump from chance-level accuracy (rpart) to 95.8% (bag) using the same underlying data illustrates how variance reduction through resampling addresses the core weakness of single decision trees on noisy sensor data.</p>
+<hr>
 </section>
 <section id="gradient-boosting-comparable-to-bagging" class="level3">
 <h3 class="anchored" data-anchor-id="gradient-boosting-comparable-to-bagging">Gradient Boosting: Comparable to Bagging</h3>
-<p>The gradient boosted random forest reached 96.3% accuracy (95% CI: 95.9–96.7%, Kappa: 0.953), marginally above the bagged tree. Sensitivity across all five classes ranged from 0.934 (Class B) to 0.993 (Class E), with no class falling below the threshold for practical utility.</p>
-<p><strong>Table 5. Confusion Matrix – Random Forest (gbm)</strong></p>
+<p>The gradient boosted model reached 96.3% accuracy (95% CI: 95.8–96.7%, Kappa: 0.953), marginally above the bagged tree. Like the random forest, the GBM produces a single aggregate variable importance score across all classes. <strong>Figure 2</strong> shows roll_belt as the dominant predictor by a wide margin, followed by pitch_forearm and yaw_belt – consistent with the role of core and forearm stability in distinguishing correct from incorrect lifting form.</p>
+<p><strong>Figure 2. Variable Importance – GBM</strong></p>
+<p><img src="outputs/gbm-varImportance.png" class="img-fluid"></p>
+<p><strong>Interpretation:</strong> The dominance of belt sensor readings in the GBM mirrors the random forest pattern, reinforcing that core movement signals are the most discriminating features for this classification task regardless of the ensemble method used.</p>
+<p><strong>Table 5</strong> shows a similar pattern to the bagged tree – misclassifications distributed across the diagonal with no class collapsing. <strong>Table 6</strong> shows sensitivity ranging from 0.938 (Class B) to 0.992 (Class E), with no class falling below the threshold for practical utility. The overall performance gap between GBM and bagging is small enough that the choice between them would depend on computational cost and deployment constraints rather than accuracy alone.</p>
+<p><strong>Table 5. Confusion Matrix – GBM</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
+<th><strong>A</strong></th>
+<th><strong>B</strong></th>
+<th><strong>C</strong></th>
+<th><strong>D</strong></th>
+<th><strong>E</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><strong>A</strong></td>
-<td>2187</td>
-<td>34</td>
-<td>6</td>
-<td>5</td>
+<td>2185</td>
+<td>36</td>
+<td>4</td>
+<td>7</td>
 <td>0</td>
 </tr>
 <tr class="even">
 <td><strong>B</strong></td>
 <td>49</td>
-<td>1435</td>
-<td>28</td>
+<td>1433</td>
+<td>30</td>
 <td>2</td>
 <td>4</td>
 </tr>
 <tr class="odd">
 <td><strong>C</strong></td>
 <td>0</td>
-<td>44</td>
-<td>1299</td>
-<td>22</td>
+<td>43</td>
+<td>1307</td>
+<td>15</td>
 <td>3</td>
 </tr>
 <tr class="even">
 <td><strong>D</strong></td>
 <td>0</td>
-<td>10</td>
-<td>28</td>
-<td>1245</td>
-<td>3</td>
+<td>7</td>
+<td>37</td>
+<td>1238</td>
+<td>29</td>
 </tr>
 <tr class="odd">
 <td><strong>E</strong></td>
 <td>2</td>
-<td>14</td>
-<td>15</td>
-<td>20</td>
+<td>8</td>
+<td>12</td>
+<td>4</td>
 <td>1391</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Table 6. Performance Statistics by Class – Random Forest (gbm)</strong></p>
+<p><strong>Table 6. Performance Statistics by Class – GBM</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -493,49 +509,49 @@ ul.task-list li input[type="checkbox"] {
 <tr class="odd">
 <td>Sensitivity</td>
 <td>0.977</td>
-<td>0.934</td>
-<td>0.944</td>
-<td>0.962</td>
-<td>0.993</td>
+<td>0.938</td>
+<td>0.940</td>
+<td>0.959</td>
+<td>0.992</td>
 </tr>
 <tr class="even">
 <td>Specificity</td>
 <td>0.992</td>
 <td>0.987</td>
-<td>0.989</td>
-<td>0.994</td>
+<td>0.991</td>
+<td>0.993</td>
 <td>0.992</td>
 </tr>
 <tr class="odd">
 <td>Pos Pred Value</td>
-<td>0.980</td>
-<td>0.945</td>
-<td>0.950</td>
-<td>0.968</td>
+<td>0.979</td>
+<td>0.944</td>
+<td>0.955</td>
+<td>0.963</td>
 <td>0.965</td>
 </tr>
 <tr class="even">
 <td>Neg Pred Value</td>
 <td>0.991</td>
-<td>0.984</td>
+<td>0.985</td>
 <td>0.988</td>
-<td>0.993</td>
+<td>0.992</td>
 <td>0.998</td>
 </tr>
 <tr class="odd">
 <td>Prevalence</td>
 <td>0.285</td>
-<td>0.196</td>
-<td>0.175</td>
+<td>0.195</td>
+<td>0.177</td>
 <td>0.165</td>
 <td>0.179</td>
 </tr>
 <tr class="even">
 <td>Detection Rate</td>
-<td>0.279</td>
+<td>0.278</td>
 <td>0.183</td>
-<td>0.166</td>
-<td>0.159</td>
+<td>0.167</td>
+<td>0.158</td>
 <td>0.177</td>
 </tr>
 <tr class="odd">
@@ -548,31 +564,33 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td>Balanced Accuracy</td>
-<td>0.985</td>
-<td>0.960</td>
-<td>0.967</td>
-<td>0.978</td>
+<td>0.984</td>
+<td>0.962</td>
+<td>0.965</td>
+<td>0.976</td>
 <td>0.992</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Figure 4. Variable Importance – Random Forest (gbm)</strong></p>
-<p><img src="gbm-varImportance.png" class="img-fluid"></p>
-<p><strong>Interpretation:</strong> Gradient boosting and bagging reached nearly identical accuracy, suggesting that for this dataset the primary performance driver is ensemble resampling itself rather than the specific weighting strategy used.</p>
+<hr>
 </section>
 <section id="random-forest-best-model" class="level3">
 <h3 class="anchored" data-anchor-id="random-forest-best-model">Random Forest: Best Model</h3>
-<p>The random forest model achieved the highest overall accuracy at 99.4% (95% CI: 99.2–99.5%, Kappa: 0.992), with sensitivity above 0.989 for all five classes. It is the recommended model for this classification task.</p>
+<p>The random forest achieved the highest overall accuracy at 99.4% (95% CI: 99.2–99.5%, Kappa: 0.992). <strong>Figure 3</strong> shows roll_belt as the dominant predictor by a wide margin, with pitch_forearm and yaw_belt following. The top predictors are concentrated in belt and forearm sensors, with arm and dumbbell sensors contributing far less – suggesting a reduced sensor deployment focused on these locations may be sufficient for accurate classification.</p>
+<p><strong>Figure 3. Variable Importance – Random Forest</strong></p>
+<p><img src="outputs/rf-varImportance.png" class="img-fluid"></p>
+<p><strong>Interpretation:</strong> The steep drop-off in importance after the top three predictors – roll_belt, pitch_forearm, yaw_belt – suggests that a substantially reduced predictor set could be used in a leaner deployment model without meaningful loss of accuracy.</p>
+<p><strong>Table 7</strong> shows near-perfect classification across all five classes – the entire off-diagonal contains only 71 misclassifications out of 7,846 observations. <strong>Table 8</strong> confirms sensitivity above 0.989 for all classes, with Class E reaching perfect sensitivity (1.000) – meaning every hip-forward error in the test set was correctly identified.</p>
 <p><strong>Table 7. Confusion Matrix – Random Forest</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
+<th><strong>A</strong></th>
+<th><strong>B</strong></th>
+<th><strong>C</strong></th>
+<th><strong>D</strong></th>
+<th><strong>E</strong></th>
 </tr>
 </thead>
 <tbody>
@@ -697,12 +715,63 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 </tbody>
 </table>
-<p><strong>Figure 1. Random Forest Model Error by Number of Trees</strong></p>
-<p><img src="rf-errorVtrees.png" class="img-fluid"></p>
-<p><strong>Interpretation:</strong> Model error declines rapidly through the first 100 trees and stabilizes around 200, indicating convergence. Each line represents one of the five form classes (A–E). The plateau after ~200 trees confirms that additional trees do not improve performance and that a smaller forest could be used in a leaner deployment.</p>
-<p><strong>Figure 2. Variable Importance – Random Forest</strong></p>
-<p><img src="rf-varImportance.png" class="img-fluid"></p>
-<p><strong>Interpretation:</strong> Variable importance identifies the sensor readings most responsible for accurate classification. Accuracy peaks at 27 of 52 predictors – the model does not benefit from the full predictor set. Collinear predictors may be inflating apparent accuracy; weighting or removing correlated variables is a recommended next step. Domain expertise in exercise physiology would be valuable in determining which of the top predictors reflect biomechanically meaningful signals.</p>
+<p><strong>Figure 4</strong> shows how model error evolves as trees are added. All six lines – one per class plus overall OOB error – decline rapidly through the first 50 trees and stabilize around 200, confirming convergence well before the 500-tree maximum. Classes C and D show the highest residual error, consistent with their being the most biomechanically similar form categories.</p>
+<p><strong>Figure 4. Model Error by Number of Trees – Random Forest</strong></p>
+<p><img src="outputs/rf-errorVtrees.png" class="img-fluid"></p>
+<p><strong>Interpretation:</strong> Convergence by ~200 trees means a smaller forest could be deployed in a production setting without sacrificing accuracy. Classes C and D – halfway up and halfway down – remain the hardest to distinguish, which makes biomechanical sense given their similar partial-range-of-motion profiles.</p>
+<p><strong>Figure 5</strong> plots cross-validation accuracy across the three predictor subset sizes tested during model tuning. Accuracy is identical at 2 and 27 predictors, then drops sharply at 52, indicating the model does not benefit from the full predictor set.</p>
+<p><strong>Figure 5. Model Accuracy by Number of Predictors – Random Forest</strong></p>
+<p><img src="outputs/rf-modelAccuracy.png" class="img-fluid"></p>
+<p><strong>Interpretation:</strong> The decline at 52 predictors points to collinearity in the full feature set. A formal collinearity analysis before deployment would identify which predictors are redundant and allow construction of a leaner, more interpretable model.</p>
+<hr>
+</section>
+<section id="model-comparison" class="level3">
+<h3 class="anchored" data-anchor-id="model-comparison">Model Comparison</h3>
+<p>Across all four models, the progression from single tree to ensemble methods tells a consistent story: resampling is essential for this classification task, and the random forest outperforms gradient boosting when both are applied to the same data. <strong>Table 9</strong> summarizes performance across all four models.</p>
+<p><strong>Table 9. Model Performance Summary</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>Accuracy</th>
+<th>95% CI</th>
+<th>Kappa</th>
+<th>OOS Error</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Decision Tree (rpart)</td>
+<td>49.7%</td>
+<td>48.6–50.9%</td>
+<td>0.343</td>
+<td>50.3%</td>
+</tr>
+<tr class="even">
+<td>Bagged Tree</td>
+<td>95.8%</td>
+<td>95.4–96.3%</td>
+<td>0.947</td>
+<td>4.2%</td>
+</tr>
+<tr class="odd">
+<td>GBM</td>
+<td>96.3%</td>
+<td>95.8–96.7%</td>
+<td>0.953</td>
+<td>3.7%</td>
+</tr>
+<tr class="even">
+<td>Random Forest</td>
+<td>99.4%</td>
+<td>99.2–99.5%</td>
+<td>0.992</td>
+<td>0.6%</td>
+</tr>
+</tbody>
+</table>
+<p>The 49.7-percentage-point gap between the decision tree and the random forest is not a marginal improvement – it is the difference between a model that cannot be deployed and one that can. The bagged tree and GBM both represent viable intermediate options, but the random forest’s sub-1% out-of-sample error makes it the clear choice for any real-world application.</p>
+<hr>
 </section>
 </section>
 <section id="next-steps" class="level2">
@@ -713,6 +782,7 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Domain validation:</strong> Collaborate with an exercise physiologist to evaluate whether the most important predictors correspond to biomechanically meaningful movement signals or are sensor artifacts.</li>
 <li><strong>Deployment testing:</strong> Evaluate whether accuracy holds under real-world conditions – varied populations, fatigue, different dumbbell weights – before considering integration into consumer fitness technology.</li>
 </ul>
+<hr>
 </section>
 <section id="study-design" class="level2">
 <h2 class="anchored" data-anchor-id="study-design">Study Design</h2>
@@ -726,18 +796,20 @@ ul.task-list li input[type="checkbox"] {
 <li>Variable importance extracted for all models to identify top predictors.</li>
 <li>Random forest accuracy evaluated across predictor counts (2 to 52) to identify the optimal predictor subset.</li>
 </ol>
+<hr>
 </section>
 <section id="project-resources" class="level2">
 <h2 class="anchored" data-anchor-id="project-resources">Project Resources</h2>
 <p><strong>Repository:</strong> <a href="https://github.com/kchoover14/ml-lift-better">github.com/kchoover14/ml-lift-better</a></p>
-<p><strong>Data:</strong> Training and test datasets from the <a href="http://groupware.les.inf.puc-rio.br/har">Weight Lifting Exercise Dataset</a> (Velloso et al., 2013), publicly available. Not included in this repository.</p>
+<p><strong>Data:</strong> Training and test datasets from the <a href="http://groupware.les.inf.puc-rio.br/har">Weight Lifting Exercise Dataset</a> (Velloso et al., 2013), publicly available. Stored in <code>data/</code>.</p>
 <p><strong>Code:</strong></p>
 <ul>
-<li><code>ml-lift-better.R</code> – data cleaning, partitioning, model training, and figure export for all four classifiers</li>
+<li><code>scripts/ml-lift-better.R</code> – data cleaning, partitioning, model training, figure export, and table export for all four classifiers</li>
 </ul>
 <p><strong>Project Artifacts:</strong></p>
 <ul>
-<li>Figures (n=4): variable importance plots for all models; random forest error by tree count</li>
+<li>Figures (n=5): variable importance plots for bag, GBM, and random forest; random forest error by tree count; random forest accuracy by predictor count. Stored in <code>outputs/</code>.</li>
+<li>Tables (n=9): confusion matrices and per-class statistics for all four models; model comparison summary. Stored in <code>outputs/</code>.</li>
 </ul>
 <p><strong>Environment:</strong></p>
 <ul>
@@ -748,12 +820,14 @@ ul.task-list li input[type="checkbox"] {
 <li>Code and scripts © Kara C. Hoover, licensed under the <a href="LICENSE">MIT License</a>.</li>
 <li>Data, figures, and written content © Kara C. Hoover, licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</li>
 </ul>
+<hr>
 </section>
 <section id="tools-technologies" class="level2">
 <h2 class="anchored" data-anchor-id="tools-technologies">Tools &amp; Technologies</h2>
 <p><strong>Languages:</strong> R</p>
 <p><strong>Tools:</strong> caret | renv</p>
-<p><strong>Packages:</strong> dplyr | ggplot2 | GGally | caret | rattle | party | rpart.plot | randomForest | gbm</p>
+<p><strong>Packages:</strong> dplyr | tidyr | ggplot2 | GGally | caret | rattle | party | rpart.plot | randomForest | gbm | viridis</p>
+<hr>
 </section>
 <section id="expertise" class="level2">
 <h2 class="anchored" data-anchor-id="expertise">Expertise</h2>
